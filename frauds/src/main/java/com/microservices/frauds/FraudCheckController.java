@@ -12,11 +12,12 @@ public class FraudCheckController {
     private  final  FraudCheckService fraudCheckService;
 
     @GetMapping("/{customerId}")
-    public boolean check(
+    public FraudCheckResponse check(
       @PathVariable("customerId") Integer customerId
     ){
-        log.info("Checking customer {}", customerId);
-        return fraudCheckService.check(customerId);
+        log.info("Fraud check requested for customer {}", customerId);
+        boolean isFraudster= fraudCheckService.check(customerId);
+        return  new FraudCheckResponse(isFraudster);
     }
 
 }

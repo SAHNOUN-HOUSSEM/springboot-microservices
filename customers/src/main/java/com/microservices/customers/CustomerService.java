@@ -1,10 +1,12 @@
 package com.microservices.customers;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public record CustomerService (
-        CustomersRepository customersRepository
+        CustomersRepository customersRepository,
+        RestTemplate restTemplate
 ){
     public void createCustomer(CustomerDto customerDto) {
         Customer customer = Customer.builder()
@@ -13,6 +15,18 @@ public record CustomerService (
                 .email(customerDto.email())
                 .build();
 
-        customersRepository.save(customer);
+        Customer savedCustomer = customersRepository.saveAndFlush(customer);
+        Integer customerId = savedCustomer.getId();
+
+
+       FraudCheckResponse fraudCheckResponse = restTemplate.getForObject(
+                "http://localhost:8081/api/v1/frauds/{customerId}",
+                FraudCheckResponse.class,
+               customerId
+        );
+
+        if(fraudCheckResponse.isFraudster()){
+            throw new IllegalStateException("Fraudster detected");
+        }
     }
 }
