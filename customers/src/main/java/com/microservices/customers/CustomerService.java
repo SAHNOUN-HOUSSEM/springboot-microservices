@@ -20,7 +20,7 @@ public record CustomerService (
 
 
        FraudCheckResponse fraudCheckResponse = restTemplate.getForObject(
-                "http://localhost:8081/api/v1/frauds/{customerId}",
+                "http://FRAUD/api/v1/frauds/{customerId}",
                 FraudCheckResponse.class,
                customerId
         );
