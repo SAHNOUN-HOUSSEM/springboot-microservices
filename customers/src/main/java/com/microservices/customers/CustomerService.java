@@ -2,15 +2,16 @@ package com.microservices.customers;
 
 import com.microservices.clients.frauds.FraudCheckResponse;
 import com.microservices.clients.frauds.FraudsClient;
+import com.microservices.clients.notifications.NotificationsClient;
+import com.microservices.clients.notifications.SendNotificationDto;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
-public record CustomerService (
+public record CustomerService(
         CustomersRepository customersRepository,
-        RestTemplate restTemplate,
-        FraudsClient fraudsClient
-){
+        FraudsClient fraudsClient,
+        NotificationsClient notificationsClient
+) {
     public void createCustomer(CustomerDto customerDto) {
         Customer customer = Customer.builder()
                 .firstName(customerDto.firstName())
@@ -22,10 +23,17 @@ public record CustomerService (
         Integer customerId = savedCustomer.getId();
 
 
-       FraudCheckResponse fraudCheckResponse =  fraudsClient.check(customerId);
+        FraudCheckResponse fraudCheckResponse = fraudsClient.check(customerId);
 
-        if(fraudCheckResponse.isFraudster()){
+        if (fraudCheckResponse.isFraudster()) {
             throw new IllegalStateException("Fraudster detected");
         }
+
+        SendNotificationDto sendNotificationDto = SendNotificationDto.builder()
+                .customerId(customerId)
+                .message("Customer created")
+                .customerEmail(customerDto.email())
+                .build();
+        notificationsClient.sendNotification(sendNotificationDto);
     }
 }
