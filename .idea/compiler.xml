@@ -11,6 +11,7 @@
         <module name="clients" />
         <module name="frauds" />
         <module name="eureka-server" />
+        <module name="notifications" />
       </profile>
     </annotationProcessing>
   </component>
