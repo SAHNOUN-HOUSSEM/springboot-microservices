@@ -1,8 +1,8 @@
 package com.microservices.customers;
 
+import com.microservices.amqp.RabbitMQMessageProducer;
 import com.microservices.clients.frauds.FraudCheckResponse;
 import com.microservices.clients.frauds.FraudsClient;
-import com.microservices.clients.notifications.NotificationsClient;
 import com.microservices.clients.notifications.SendNotificationDto;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public record CustomerService(
         CustomersRepository customersRepository,
         FraudsClient fraudsClient,
-        NotificationsClient notificationsClient
+        RabbitMQMessageProducer messageProducer
 ) {
     public void createCustomer(CustomerDto customerDto) {
         Customer customer = Customer.builder()
@@ -34,6 +34,12 @@ public record CustomerService(
                 .message("Customer created")
                 .customerEmail(customerDto.email())
                 .build();
-        notificationsClient.sendNotification(sendNotificationDto);
+
+        messageProducer.publish(
+                sendNotificationDto,
+                "internal.exchange",
+                "internal.notification.routing-key"
+        );
+
     }
 }

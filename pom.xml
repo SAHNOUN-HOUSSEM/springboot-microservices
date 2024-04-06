@@ -19,6 +19,8 @@
       <module>clients</module>
       <module>notifications</module>
       <module>api-gateway</module>
+      <module>amqp</module>
+      <module>common</module>
   </modules>
 
   <properties>
